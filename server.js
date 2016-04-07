@@ -11,6 +11,15 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+// configure database
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/grabit');
+
+// importing models
+var Ad = require('./app/models/ad.js');
+var Location = require('./app/models/location.js');
+var User = require('./app/models/user.js');
+
 var port = process.env.port || 8080; // set our port
 
 // ROUTES FOR OUR API
