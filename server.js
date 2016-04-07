@@ -27,16 +27,16 @@ var port = process.env.port || 8080; // set our port
 var router = express.Router(); // get an instance of the express router
 
 // middleware to use for all requests
-router.use(function (req, res, next) {
+// router.use(function (req, res, next) {
 	// do logging
-	console.log('Something is happening');
-	next(); // make sure we go to the next routes and don't stop here
-});
+	// console.log('Something is happening');
+	// next(); // make sure we go to the next routes and don't stop here
+// });
 
 // test route to make sure everything's workin'
-router.get('/', function(req, res) {
-	res.json({ message: "cheers" });
-});
+// router.get('/', function(req, res) {
+	// res.json({ message: "cheers" });
+// });
 
 // Custom routes
 
@@ -68,6 +68,54 @@ router.route('/ads')
 			
 			res.json(ads);
 		});
+	});
+
+// on routes that end in /ads/:ad_id
+// ---------------------------
+router.route('/ads/:ad_id')
+
+	// get the ad with that id (accessed at GET '/api/ads/:ad_id)
+	.get(function (req, res) {
+		
+		// Use our Ad model to find the Ad we want
+		Ad.findById(req.params.ad_id, function (err, ad) {
+			if (err) { res.send(err); }
+			
+			res.json(ad);
+		});
+	})
+	
+	// update the ad with this id (accessed at PUT '/api/ads/:ad_id')
+	.put(function (req, res) {
+		
+		// Use our Ad model to find the Ad we want
+		Ad.findById(req.params.ad_id, function (err, ad) {
+			if (err) { res.send(err); }
+			
+			// update the ads info
+			ad.title = req.body.title;
+			ad.price = req.body.price;
+			ad.description = req.body.description;
+			
+			// save the ad
+			ad.save(function (err) {
+				if (err) { res.send(err); }
+				
+				res.json({ message: 'Ad updated' });
+			});
+		});
+	})
+	
+	// delete the ad with this id (accessed at DELETE '/api/ads/:ad_id')
+	.delete(function (req, res) {
+		Ad.remove({
+			_id: req.params.ad_id
+		}, function (err, ad) {
+			if (err) { res.send(err); }
+			
+			res.json({ message: 'Successfully deleted' });
+		});
+		
 	});
 
 // REGISTER OUR ROUTES -----------
