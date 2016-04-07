@@ -26,12 +26,49 @@ var port = process.env.port || 8080; // set our port
 // ===========================
 var router = express.Router(); // get an instance of the express router
 
+// middleware to use for all requests
+router.use(function (req, res, next) {
+	// do logging
+	console.log('Something is happening');
+	next(); // make sure we go to the next routes and don't stop here
+});
+
 // test route to make sure everything's workin'
 router.get('/', function(req, res) {
 	res.json({ message: "cheers" });
 });
 
-// ...
+// Custom routes
+
+// on routes that end in /ads
+// ---------------------------
+router.route('/ads')
+
+	// create an ad (accessed at POST '/api/ads')
+	.post(function (req, res) {
+		
+		var ad = new Ad(); // Create a new instance of the Ad model
+		ad.title = req.body.title;
+		ad.price = req.body.price;
+		ad.description = req.body.description;
+		
+		// save the ad and check for errors
+		ad.save(function (err) {
+			if (err) { res.send(err); }
+			
+			res.json({ message: 'Ad created' });
+		});
+		
+	})
+	
+	// get all the ads (accessed at GET '/api/ads')
+	.get(function (req, res) {
+		Ad.find( function(err, ads) {
+			if (err) { res.send(err); }
+			
+			res.json(ads);
+		});
+	});
 
 // REGISTER OUR ROUTES -----------
 // all of our routes will be prefixed with '/api'

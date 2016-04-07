@@ -6,8 +6,8 @@ var AdSchema = new Schema({
 	created: { type: Date, default: Date.now },
 	updated: { type: Date, default: Date.now },
 	price: Number,
-	_locationId: Schema.type.ObjectId,
-	_ownerId: Schema.type.ObjectId,
+	_locationId: Schema.Types.ObjectId,
+	_ownerId: Schema.Types.ObjectId,
 	description: String 
 });
 
