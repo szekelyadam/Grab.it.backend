@@ -1,0 +1,16 @@
+{
+	"name": "Grab.it.backend",
+	"version": "1.0.0",
+	"description": "Grab.it iOS app backend",
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/szekelyadam/Grab.it.backend.git"
+	},
+	"main": "server.js",
+	"dependencies": {
+		"express": "~4.0.0",
+		"mongoose": "~3.6.13",
+		"body-parser": "~1.0.1"
+	},
+	"private": true
+}
