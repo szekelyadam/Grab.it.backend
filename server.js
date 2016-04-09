@@ -26,6 +26,7 @@ var Ad = require('./app/models/ad.js');
 var Category = require('./app/models/category.js');
 var City = require('./app/models/city.js');
 var County = require('./app/models/county.js');
+var Image = require('./app/models/image.js');
 var User = require('./app/models/user.js');
 
 var port = process.env.port || 8080; // set our port
@@ -57,8 +58,19 @@ router.route('/ads')
 		
 		var ad = new Ad(); // Create a new instance of the Ad model
 		ad.title = req.body.title;
-		ad.price = req.body.price;
 		ad.description = req.body.description;
+		ad.price = req.body.price;
+		ad.city_id = req.body.city_id;
+		ad.user_id = mongoose.Types.ObjectId(req.body.user_id);
+		ad.category_id = mongoose.Types.ObjectId(req.body.category_id);
+		
+		// if (req.body.images !== null) {
+		// 	req.body.images.forEach(function(imageContent) {
+		// 		var image = new Image();
+		// 		image.image = imageContent;
+		// 		ad.images.push(image);
+		// 	}, this);	
+		// }
 		
 		// save the ad and check for errors
 		ad.save(function (err) {
