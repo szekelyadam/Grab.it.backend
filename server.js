@@ -64,13 +64,13 @@ router.route('/ads')
 		ad.user_id = mongoose.Types.ObjectId(req.body.user_id);
 		ad.category_id = mongoose.Types.ObjectId(req.body.category_id);
 		
-		// if (req.body.images !== null) {
-		// 	req.body.images.forEach(function(imageContent) {
-		// 		var image = new Image();
-		// 		image.image = imageContent;
-		// 		ad.images.push(image);
-		// 	}, this);	
-		// }
+		if (req.body.images !== null) {
+			req.body.images.forEach(function(imageContent) {
+				var image = new Image();
+				image.image = imageContent;
+				ad.images.push(image);
+			}, this);	
+		}
 		
 		// save the ad and check for errors
 		ad.save(function (err) {
@@ -116,6 +116,16 @@ router.route('/ads/:ad_id')
 			ad.title = req.body.title;
 			ad.price = req.body.price;
 			ad.description = req.body.description;
+			
+			ad.images = [];
+			
+			if (req.body.images !== null) {
+				req.body.images.forEach(function(imageContent) {
+					var image = new Image();
+					image.image = imageContent;
+					ad.images.push(image);
+				}, this);	
+			}
 			
 			// save the ad
 			ad.save(function (err) {
