@@ -23,7 +23,8 @@ if (process.env.NODE_ENV == 'development') {
 
 // importing models
 var Ad = require('./app/models/ad.js');
-var Location = require('./app/models/location.js');
+var City = require('./app/models/city.js');
+var County = require('./app/models/county.js');
 var User = require('./app/models/user.js');
 
 var port = process.env.port || 8080; // set our port
@@ -122,6 +123,42 @@ router.route('/ads/:ad_id')
 			res.json({ message: 'Successfully deleted' });
 		});
 		
+	});
+	
+router.route('/cities')
+	.get(function (req, res) {
+		City.find( function(err, cities) {
+			if (err) { res.send(err); }
+			
+			if (cities.length === 0) {
+				var seed = require('./app/helpers/seed');
+				seed();
+				City.find( function(err, cities) {
+					if (err) { res.send(err); }
+					res.json(cities);
+				});	
+			}
+			
+			res.json(cities);
+		});
+	});
+
+router.route('/counties')
+	.get(function (req, res) {
+		County.find( function(err, counties) {
+			if (err) { res.send(err); }
+			
+			if (counties.length === 0) {
+				var seed = require('./app/helpers/seed');
+				seed();
+				County.find( function(err, counties) {
+					if (err) { res.send(err); }
+					res.json(counties);
+				});
+			}
+			
+			res.json(counties);
+		});
 	});
 
 // REGISTER OUR ROUTES -----------

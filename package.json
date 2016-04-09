@@ -12,7 +12,9 @@
 		"mongoose": "~3.6.13",
 		"body-parser": "~1.0.1",
 		"bson": "0.2.2",
-		"kerberos": "0.0.3"
+		"kerberos": "0.0.3",
+		"node-xlsx": "~0.6.0",
+		"excel": "~0.1.4"
 	},
 	"private": true
 }
