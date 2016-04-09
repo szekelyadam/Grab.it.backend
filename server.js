@@ -148,6 +148,79 @@ router.route('/ads/:ad_id')
 		
 	});
 
+
+// on routes that end in /categories
+// ---------------------------
+router.route('/categories')
+
+	// create a category (accessed at POST '/api/categories')
+	.post(function (req, res) {
+		
+		Category.findOne({ 'name': req.body.name }, function (err, cat) {
+			console.log(cat !== null);
+			if (cat !== null) {
+				res.json({ message: 'Category already exists' });
+			} else {
+				var category = new Category(); // Create a new instance of the Category model
+				category.name = req.body.name;
+		
+				if (req.body.parent_id !== undefined) {
+					category.parent_id = mongoose.Types.ObjectId(req.body.parent_id);	
+				}
+		
+				if (req.body.icon !== undefined) {
+					var image = new Image();
+					image.image = req.body.icon;
+					category.image = image;	
+				}
+				
+				// save the category and check for errors
+				category.save(function (err) {
+					if (err) { res.send(err); }
+					
+					res.json({ message: 'Category created' });
+				});	
+			}
+		});
+		
+	})
+	
+	// get all the ads (accessed at GET '/api/categories')
+	.get(function (req, res) {
+		Category.find( function(err, categories) {
+			if (err) { res.send(err); }
+			
+			res.json(categories);
+		});
+	});
+	
+// on routes that end in /categories/:category_id
+// ---------------------------
+router.route('/categories/:category_id')
+
+	// get the category with that id (accessed at GET '/api/categories/:category_id)
+	.get(function (req, res) {
+		
+		// Use our Category model to find the Category we want
+		Category.findById(req.params.category_id, function (err, ad) {
+			if (err) { res.send(err); }
+			
+			res.json(ad);
+		});
+	})
+	
+	// delete the category with this id (accessed at DELETE '/api/categories/:category_id')
+	.delete(function (req, res) {
+		Category.remove({
+			_id: req.params.category_id
+		}, function (err, category) {
+			if (err) { res.send(err); }
+			
+			res.json({ message: 'Successfully deleted' });
+		});
+		
+	});
+
 // on routes that end in /cities
 // ---------------------------	
 router.route('/cities')
@@ -167,7 +240,7 @@ router.route('/cities')
 			res.json(cities);
 		});
 	});
-
+	
 // on routes that end in /counties
 // ---------------------------
 router.route('/counties')

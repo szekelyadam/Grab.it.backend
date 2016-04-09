@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var CategorySchema = new Schema({
-	name: String,
+	name: { type: String, required: true, unique: true },
 	parent_id: Schema.ObjectId,
 	icon: {
 		type: Schema.ObjectId,
