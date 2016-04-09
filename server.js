@@ -23,6 +23,7 @@ if (process.env.NODE_ENV == 'development') {
 
 // importing models
 var Ad = require('./app/models/ad.js');
+var Category = require('./app/models/category.js');
 var City = require('./app/models/city.js');
 var County = require('./app/models/county.js');
 var User = require('./app/models/user.js');
@@ -124,7 +125,9 @@ router.route('/ads/:ad_id')
 		});
 		
 	});
-	
+
+// on routes that end in /cities
+// ---------------------------	
 router.route('/cities')
 	.get(function (req, res) {
 		City.find( function(err, cities) {
@@ -143,6 +146,8 @@ router.route('/cities')
 		});
 	});
 
+// on routes that end in /counties
+// ---------------------------
 router.route('/counties')
 	.get(function (req, res) {
 		County.find( function(err, counties) {

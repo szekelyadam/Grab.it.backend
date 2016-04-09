@@ -3,7 +3,7 @@ var Schema = mongoose.Schema;
 
 var CitySchema = new Schema({
 	_id: Number,
-	countyId: Number,
+	county_id: Number,
 	zip: Number,
 	name: String
 });

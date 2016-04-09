@@ -7,7 +7,6 @@ var seedLocations = function () {
 		
 	// iterating through the rows of the xlsx
 	hunXlsx[0].data.forEach(function(element) {
-		console.log(element);
 		// check if city already exists
 		City.findById(element[0], function(err, ci) {
 			if (err) { return err; }
@@ -19,7 +18,7 @@ var seedLocations = function () {
 		
 				city._id = element[0];
 				city.zip = element[1];
-				city.countyId = element[2];
+				city.county_id = element[2];
 				city.name = element[4];
 				
 				// Check if the county exists
