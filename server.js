@@ -5,6 +5,7 @@
 var express = require('express'); // call express
 var app = express(); // define our app using express
 var bodyParser = require('body-parser');
+var http = require('http');
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -13,7 +14,12 @@ app.use(bodyParser.json());
 
 // configure database
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/grabit');
+
+if (process.env.NODE_ENV == 'development') {
+	mongoose.connect('mongodb://localhost/grabit');
+} else {
+	mongoose.connect("mongodb://admin:4eH8pNKf31Kz@" + process.env.OPENSHIFT_MONGODB_DB_HOST + ":$OPENSHIFT_MONGODB_DB_PORT/grabit");
+}
 
 // importing models
 var Ad = require('./app/models/ad.js');
@@ -124,8 +130,12 @@ app.use('/api', router);
 
 // START THE SERVER
 // ===========================
-app.listen(port);
-console.log('Magic happens on port ' + port);
+app.set('port', process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || 3002);
+app.set('ip', process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1");
+
+http.createServer(app).listen(app.get('port') ,app.get('ip'));
+
+console.log('Magic happens on port ' + app.get('port'));
 
 
 
