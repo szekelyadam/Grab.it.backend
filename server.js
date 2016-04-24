@@ -183,7 +183,7 @@ router.route('/categories')
 
 	// get all the ads (accessed at GET '/api/categories')
 	.get(function (req, res) {
-		Category.find( function(err, categories) {
+		Category.find({ "parent_id": { "$exists": false } }, function(err, categories) {
 			if (err) { res.send(err); }
 
 			res.json(categories);
