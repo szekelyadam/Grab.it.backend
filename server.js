@@ -55,7 +55,7 @@ router.route('/ads')
 
 	// create an ad (accessed at POST '/api/ads')
 	.post(function (req, res) {
-		
+
 		var ad = new Ad(); // Create a new instance of the Ad model
 		ad.title = req.body.title;
 		ad.description = req.body.description;
@@ -63,29 +63,29 @@ router.route('/ads')
 		ad.city_id = req.body.city_id;
 		ad.user_id = mongoose.Types.ObjectId(req.body.user_id);
 		ad.category_id = mongoose.Types.ObjectId(req.body.category_id);
-		
+
 		if (req.body.images !== null) {
 			req.body.images.forEach(function(imageContent) {
 				var image = new Image();
 				image.image = imageContent;
 				ad.images.push(image);
-			}, this);	
+			}, this);
 		}
-		
+
 		// save the ad and check for errors
 		ad.save(function (err) {
 			if (err) { res.send(err); }
-			
+
 			res.json({ message: 'Ad created' });
 		});
-		
+
 	})
-	
+
 	// get all the ads (accessed at GET '/api/ads')
 	.get(function (req, res) {
 		Ad.find( function(err, ads) {
 			if (err) { res.send(err); }
-			
+
 			res.json(ads);
 		});
 	});
@@ -96,56 +96,56 @@ router.route('/ads/:ad_id')
 
 	// get the ad with that id (accessed at GET '/api/ads/:ad_id)
 	.get(function (req, res) {
-		
+
 		// Use our Ad model to find the Ad we want
 		Ad.findById(req.params.ad_id, function (err, ad) {
 			if (err) { res.send(err); }
-			
+
 			res.json(ad);
 		});
 	})
-	
+
 	// update the ad with this id (accessed at PUT '/api/ads/:ad_id')
 	.put(function (req, res) {
-		
+
 		// Use our Ad model to find the Ad we want
 		Ad.findById(req.params.ad_id, function (err, ad) {
 			if (err) { res.send(err); }
-			
+
 			// update the ads info
 			ad.title = req.body.title;
 			ad.price = req.body.price;
 			ad.description = req.body.description;
-			
+
 			ad.images = [];
-			
+
 			if (req.body.images !== null) {
 				req.body.images.forEach(function(imageContent) {
 					var image = new Image();
 					image.image = imageContent;
 					ad.images.push(image);
-				}, this);	
+				}, this);
 			}
-			
+
 			// save the ad
 			ad.save(function (err) {
 				if (err) { res.send(err); }
-				
+
 				res.json({ message: 'Ad updated' });
 			});
 		});
 	})
-	
+
 	// delete the ad with this id (accessed at DELETE '/api/ads/:ad_id')
 	.delete(function (req, res) {
 		Ad.remove({
 			_id: req.params.ad_id
 		}, function (err, ad) {
 			if (err) { res.send(err); }
-			
+
 			res.json({ message: 'Successfully deleted' });
 		});
-		
+
 	});
 
 
@@ -155,7 +155,7 @@ router.route('/categories')
 
 	// create a category (accessed at POST '/api/categories')
 	.post(function (req, res) {
-		
+
 		Category.findOne({ 'name': req.body.name }, function (err, cat) {
 			console.log(cat !== null);
 			if (cat !== null) {
@@ -163,91 +163,104 @@ router.route('/categories')
 			} else {
 				var category = new Category(); // Create a new instance of the Category model
 				category.name = req.body.name;
-		
+
 				if (req.body.parent_id !== undefined) {
-					category.parent_id = mongoose.Types.ObjectId(req.body.parent_id);	
+					category.parent_id = mongoose.Types.ObjectId(req.body.parent_id);
 				}
-		
-				if (req.body.icon !== undefined) {
-					var image = new Image();
-					image.image = req.body.icon;
-					category.image = image;	
-				}
-				
+
+				category.icon = req.body.icon;
+
 				// save the category and check for errors
 				category.save(function (err) {
 					if (err) { res.send(err); }
-					
+
 					res.json({ message: 'Category created' });
-				});	
+				});
 			}
 		});
-		
+
 	})
-	
+
 	// get all the ads (accessed at GET '/api/categories')
 	.get(function (req, res) {
 		Category.find( function(err, categories) {
 			if (err) { res.send(err); }
-			
+
 			res.json(categories);
 		});
 	});
-	
+
 // on routes that end in /categories/:category_id
 // ---------------------------
 router.route('/categories/:category_id')
 
 	// get the category with that id (accessed at GET '/api/categories/:category_id)
 	.get(function (req, res) {
-		
+
 		// Use our Category model to find the Category we want
-		Category.findById(req.params.category_id, function (err, ad) {
+		Category.findById(req.params.category_id, function (err, category) {
 			if (err) { res.send(err); }
-			
-			res.json(ad);
+
+			res.json(category);
 		});
 	})
-	
+
 	// delete the category with this id (accessed at DELETE '/api/categories/:category_id')
 	.delete(function (req, res) {
 		Category.remove({
 			_id: req.params.category_id
 		}, function (err, category) {
 			if (err) { res.send(err); }
-			
+
 			res.json({ message: 'Successfully deleted' });
 		});
-		
+
+	});
+
+// on routes that end in /categories/:category_id/subcategories
+router.route('/categories/:category_id/subcategories')
+
+	// get the category's subcategories
+	.get(function (req, res) {
+
+		Category.findById(req.params.category_id, function(err, category) {
+			if (err) { res.send(err); }
+
+			Category.find({ "parent_id": category._id }, function(err, subcategories) {
+				if (err) { res.send(err); }
+
+				res.json(subcategories);
+			});
+		});
 	});
 
 // on routes that end in /cities
-// ---------------------------	
+// ---------------------------
 router.route('/cities')
 	.get(function (req, res) {
 		City.find( function(err, cities) {
 			if (err) { res.send(err); }
-			
+
 			if (cities.length === 0) {
 				var seed = require('./app/helpers/seed');
 				seed();
 				City.find( function(err, cities) {
 					if (err) { res.send(err); }
 					res.json(cities);
-				});	
+				});
 			}
-			
+
 			res.json(cities);
 		});
 	});
-	
+
 // on routes that end in /counties
 // ---------------------------
 router.route('/counties')
 	.get(function (req, res) {
 		County.find( function(err, counties) {
 			if (err) { res.send(err); }
-			
+
 			if (counties.length === 0) {
 				var seed = require('./app/helpers/seed');
 				seed();
@@ -256,7 +269,7 @@ router.route('/counties')
 					res.json(counties);
 				});
 			}
-			
+
 			res.json(counties);
 		});
 	});
@@ -273,8 +286,3 @@ app.set('ip', process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1");
 http.createServer(app).listen(app.get('port') ,app.get('ip'));
 
 console.log('Magic happens on port ' + app.get('port'));
-
-
-
-
-
