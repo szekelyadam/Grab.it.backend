@@ -6,11 +6,13 @@ var express = require('express'); // call express
 var app = express(); // define our app using express
 var bodyParser = require('body-parser');
 var http = require('http');
+var fs = require('fs');
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use('/public', express.static('public')); 
 
 // configure database
 var mongoose = require('mongoose');
@@ -64,12 +66,12 @@ router.route('/ads')
 		ad.user_id = mongoose.Types.ObjectId(req.body.user_id);
 		ad.category_id = mongoose.Types.ObjectId(req.body.category_id);
 
-		if (req.body.images !== null) {
-			req.body.images.forEach(function(imageContent) {
-				var image = new Image();
-				image.image = imageContent;
-				ad.images.push(image);
-			}, this);
+		if (req.body.image !== null) {
+			var data = req.body.image.replace(/^data:image\/\w+;base64,/, '');
+			var fileName = 'public/'  + ad.id + '.jpg';
+			fs.writeFile(fileName, data, {encoding: 'base64'}, function(err){
+  			if(err) { res.send(err); }
+			});
 		}
 
 		// save the ad and check for errors
@@ -85,7 +87,14 @@ router.route('/ads')
 	.get(function (req, res) {
 		Ad.find( function(err, ads) {
 			if (err) { res.send(err); }
-
+			console.log(ads[2].image);
+			Image.find({"_id": ads[2].image}, function(error, image) {
+				if (error) {
+					console.log(error);
+				} else {
+					console.log(image);
+				}
+			});
 			res.json(ads);
 		});
 	});
