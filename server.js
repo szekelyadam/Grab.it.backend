@@ -12,7 +12,7 @@ var fs = require('fs');
 // this will let us get the data from a POST
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use('/public', express.static('public')); 
+app.use('/public', express.static('public'));
 
 // configure database
 var mongoose = require('mongoose');
@@ -87,14 +87,7 @@ router.route('/ads')
 	.get(function (req, res) {
 		Ad.find( function(err, ads) {
 			if (err) { res.send(err); }
-			console.log(ads[2].image);
-			Image.find({"_id": ads[2].image}, function(error, image) {
-				if (error) {
-					console.log(error);
-				} else {
-					console.log(image);
-				}
-			});
+
 			res.json(ads);
 		});
 	});
