@@ -12,15 +12,16 @@ var fs = require('fs');
 // this will let us get the data from a POST
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use('/public', express.static('public'));
 
 // configure database
 var mongoose = require('mongoose');
 
 if (process.env.NODE_ENV == 'development') {
 	mongoose.connect('mongodb://localhost/grabit');
+	app.use('/public', express.static('public'));
 } else {
 	mongoose.connect("mongodb://admin:4eH8pNKf31Kz@" + process.env.OPENSHIFT_MONGODB_DB_HOST + ":$OPENSHIFT_MONGODB_DB_PORT/grabit");
+	app.use($OPENSHIFT_DATA_DIR, express.static($OPENSHIFT_DATA_DIR));
 }
 
 // importing models
