@@ -75,9 +75,9 @@ router.route('/ads')
 			} else {
 				fileName = process.env.OPENSHIFT_DATA_DIR + '/' + ad.id + '.jpg';
 			}
+			ad.image_url = fileName;
 			fs.writeFile(fileName, data, {encoding: 'base64'}, function(err){
   			if(err) { res.send(err); }
-				ad.image_url = fileName
 			});
 		}
 
