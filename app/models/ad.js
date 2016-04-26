@@ -9,6 +9,7 @@ var AdSchema = new Schema({
 	price: { type: Number, required: true },
 	image_url: String,
 	city_id: { type: Number, required: true },
+	city_name: { type: String, required: true },
 	user_id: { type: Schema.ObjectId, required: true },
 	category_id: { type: Schema.ObjectId, required: true },
 	created: { type: Date, default: Date.now },

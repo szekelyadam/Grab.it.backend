@@ -64,29 +64,33 @@ router.route('/ads')
 		ad.description = req.body.description;
 		ad.price = req.body.price;
 		ad.city_id = req.body.city_id;
-		ad.user_id = mongoose.Types.ObjectId(req.body.user_id);
-		ad.category_id = mongoose.Types.ObjectId(req.body.category_id);
 
-		if (req.body.image !== null) {
-			var data = req.body.image.replace(/^data:image\/\w+;base64,/, '');
-			var fileName = '';
-			if (process.env.NODE_ENV == 'development') {
-				fileName = 'public/' + ad.id + '.jpg';
-			} else {
-				fileName = process.env.OPENSHIFT_DATA_DIR + '/' + ad.id + '.jpg';
+		City.find({ "_id": ad.city_id }, function(err, city) {
+			ad.city_name = city[0]["name"];
+			ad.user_id = mongoose.Types.ObjectId(req.body.user_id);
+			ad.category_id = mongoose.Types.ObjectId(req.body.category_id);
+
+			if (req.body.image !== null) {
+				var data = req.body.image.replace(/^data:image\/\w+;base64,/, '');
+				var fileName = '';
+				if (process.env.NODE_ENV == 'development') {
+					fileName = 'public/' + ad.id + '.jpg';
+				} else {
+					fileName = process.env.OPENSHIFT_DATA_DIR + '/' + ad.id + '.jpg';
+				}
+				ad.image_url = fileName;
+				fs.writeFile(fileName, data, {encoding: 'base64'}, function(err){
+	  			if(err) { res.send(err); }
+				});
 			}
-			ad.image_url = fileName;
-			fs.writeFile(fileName, data, {encoding: 'base64'}, function(err){
-  			if(err) { res.send(err); }
+
+			// save the ad and check for errors
+			ad.save(function (err) {
+				if (err) { res.send(err); }
+
+				res.json({ message: 'Ad created' });
 			});
-		}
-
-		// save the ad and check for errors
-		ad.save(function (err) {
-			if (err) { res.send(err); }
-
-			res.json({ message: 'Ad created' });
-		});
+		})
 
 	})
 
@@ -281,6 +285,17 @@ router.route('/cities')
 
 			res.json(cities);
 		});
+	});
+
+// on routes that end in /cities/city_id
+// ----------------------------
+router.route('/cities/:city_id')
+	.get(function (req, res) {
+		City.find({ "_id": req.params.city_id }, function(err, city) {
+			if (err) { res.send(err); }
+			console.log(req.params.city_id);
+			res.json(city[0]["name"]);
+		})
 	});
 
 // on routes that end in /counties
