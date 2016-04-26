@@ -85,7 +85,24 @@ router.route('/ads')
 
 	// get all the ads (accessed at GET '/api/ads')
 	.get(function (req, res) {
-		Ad.find( function(err, ads) {
+		var query = Ad.find();
+
+		// searching in title and descripiton with free words
+		var title = new RegExp(req.param('title'), 'i');
+		var desc = new RegExp(req.param('description'), 'i');
+		query.find({ "title": title });
+		query.or({ "description": desc });
+
+		// checking the city and category params, if exist bind it to our query
+		if (req.param('city_id')) {
+			query.where('city_id').equals(req.param('city_id'));
+		}
+		if (req.param('category_id')) {
+			query.where('category_id').equals(req.param('category_id'));
+		}
+
+		// execute query
+		query.exec( function(err, ads) {
 			if (err) { res.send(err); }
 
 			res.json(ads);
