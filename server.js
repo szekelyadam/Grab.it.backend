@@ -99,10 +99,8 @@ router.route('/ads')
 		var query = Ad.find();
 
 		// searching in title and descripiton with free words
-		var title = new RegExp(req.param('title'), 'i');
-		var desc = new RegExp(req.param('description'), 'i');
-		query.find({ "title": title });
-		query.or({ "description": desc });
+		var text = new RegExp(req.param('text'), 'i');
+		query.find({ $or: [ { "title": text }, { "description": text } ] });
 
 		// checking the city and category params, if exist bind it to our query
 		if (req.param('city_id')) {
