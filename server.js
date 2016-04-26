@@ -21,7 +21,7 @@ if (process.env.NODE_ENV == 'development') {
 	app.use('/public', express.static('public'));
 } else {
 	mongoose.connect("mongodb://admin:4eH8pNKf31Kz@" + process.env.OPENSHIFT_MONGODB_DB_HOST + ":$OPENSHIFT_MONGODB_DB_PORT/grabit");
-	app.use($OPENSHIFT_DATA_DIR, express.static($OPENSHIFT_DATA_DIR));
+	app.use(process.env.OPENSHIFT_DATA_DIR, express.static(process.env.OPENSHIFT_DATA_DIR));
 }
 
 // importing models
@@ -73,7 +73,7 @@ router.route('/ads')
 			if (process.env.NODE_ENV == 'development') {
 				fileName = 'public/' + ad.id + '.jpg';
 			} else {
-				fileName = $OPENSHIFT_DATA_DIR + '/' + ad.id + '.jpg';
+				fileName = process.env.OPENSHIFT_DATA_DIR + '/' + ad.id + '.jpg';
 			}
 			fs.writeFile(fileName, data, {encoding: 'base64'}, function(err){
   			if(err) { res.send(err); }
