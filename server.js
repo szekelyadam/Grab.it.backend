@@ -68,10 +68,11 @@ router.route('/ads')
 
 		if (req.body.image !== null) {
 			var data = req.body.image.replace(/^data:image\/\w+;base64,/, '');
+			var fileName = '';
 			if (process.env.NODE_ENV == 'development') {
-				var fileName = 'public/' + ad.id + '.jpg';
+				fileName = 'public/' + ad.id + '.jpg';
 			} else {
-				var fileName = $OPENSHIFT_DATA_DIR + '/' + ad.id + '.jpg';
+				fileName = $OPENSHIFT_DATA_DIR + '/' + ad.id + '.jpg';
 			}
 			fs.writeFile(fileName, data, {encoding: 'base64'}, function(err){
   			if(err) { res.send(err); }
