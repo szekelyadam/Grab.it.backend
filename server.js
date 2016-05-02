@@ -221,6 +221,19 @@ router.route('/categories')
 		});
 	});
 
+// on routes that end in /categories/subcategories
+// ----------------------------
+router.route('/categories/subcategories')
+
+	// get all subcategories (accessed at GET '/api/categories/subcategories')
+	.get(function (req, res) {
+		Category.find({ "parent_id": { "$exists": true } }, function(err, categories) {
+			if (err) { res.send(err); }
+
+			res.json(categories);
+		});
+	});
+
 // on routes that end in /categories/:category_id
 // ---------------------------
 router.route('/categories/:category_id')
