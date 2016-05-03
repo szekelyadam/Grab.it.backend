@@ -63,10 +63,10 @@ router.route('/ads')
 		ad.title = req.body.title;
 		ad.description = req.body.description;
 		ad.price = req.body.price;
-		ad.city_id = req.body.city_id;
+		ad.city.id = req.body.city_id;
 
-		City.find({ "_id": ad.city_id }, function(err, city) {
-			ad.city_name = city[0]["name"];
+		City.find({ "_id": ad.city.id }, function(err, city) {
+			ad.city.name = city[0]["name"];
 			ad.user_id = mongoose.Types.ObjectId(req.body.user_id);
 			ad.category_id = mongoose.Types.ObjectId(req.body.category_id);
 
@@ -103,13 +103,13 @@ router.route('/ads')
 		query.find({ $or: [ { "title": text }, { "description": text } ] });
 
 		// checking the city and category params, if exist bind it to our query
-		if (req.param('city_id')) {
-			query.where('city_id').equals(req.param('city_id'));
+		if (req.param('city')) {
+			query.where('city.name').equals(req.param('city'));
 		}
 		if (req.param('category_id')) {
 			query.where('category_id').equals(req.param('category_id'));
 		}
-		if (req.param('gt') && req.param('lt')) {
+		if (req.param('gt') && req.param('lt') && (parseInt(req.param('gt')) >= 0 && parseInt(req.param('lt') > 0 && parseInt(req.param('lt') > parseInt(req.param('gt')))))) {
 			query.find({ 'price': { '$gt': req.param('gt'), '$lt': req.param('lt') }});
 		}
 
@@ -282,13 +282,13 @@ router.route('/categories/:category_id/subcategories')
 // ---------------------------
 router.route('/cities')
 	.get(function (req, res) {
-		City.find( function(err, cities) {
+		City.find().sort('name').exec(function(err, cities) {
 			if (err) { res.send(err); }
 
 			if (cities.length === 0) {
 				var seed = require('./app/helpers/seed');
 				seed();
-				City.find( function(err, cities) {
+				City.find().sort('name').exec(function(err, cities) {
 					if (err) { res.send(err); }
 					res.json(cities);
 				});
