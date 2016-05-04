@@ -63,16 +63,16 @@ router.route('/ads')
 		ad.title = req.body.title;
 		ad.description = req.body.description;
 		ad.price = req.body.price;
-		ad.city.id = req.body.city_id;
+		ad.city.name = req.body.city;
 
-		City.find({ "_id": ad.city.id }, function(err, city) {
-			ad.city.name = city[0]["name"];
+		City.find({ "name": ad.city.name }, function(err, city) {
+			ad.city.id = city[0]["_id"];
 			ad.user_id = mongoose.Types.ObjectId(req.body.user_id);
-			ad.category.id = mongoose.Types.ObjectId(req.body.category_id);
+			ad.category.name = req.body.category;
 
-			Category.find({ "_id": ad.category.id }, function(err, category) {
-				ad.category.name = category[0]["name"];
-				if (req.body.image !== null) {
+			Category.find({ "name": ad.category.name }, function(err, category) {
+				ad.category.id = category[0]["_id"];
+				if (req.body.image !== undefined) {
 					var data = req.body.image.replace(/^data:image\/\w+;base64,/, '');
 					var fileName = '';
 					if (process.env.NODE_ENV == 'development') {
