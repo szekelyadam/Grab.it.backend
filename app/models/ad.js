@@ -10,7 +10,7 @@ var AdSchema = new Schema({
 	image_url: String,
 	city: { id: Number, name: String },
 	user_id: { type: Schema.ObjectId, required: true },
-	category_id: { type: Schema.ObjectId, required: true },
+	category: { id: Schema.ObjectId, name: String },
 	created: { type: Date, default: Date.now },
 	updated: { type: Date, default: Date.now }
 });

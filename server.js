@@ -68,30 +68,32 @@ router.route('/ads')
 		City.find({ "_id": ad.city.id }, function(err, city) {
 			ad.city.name = city[0]["name"];
 			ad.user_id = mongoose.Types.ObjectId(req.body.user_id);
-			ad.category_id = mongoose.Types.ObjectId(req.body.category_id);
+			ad.category.id = mongoose.Types.ObjectId(req.body.category_id);
 
-			if (req.body.image !== null) {
-				var data = req.body.image.replace(/^data:image\/\w+;base64,/, '');
-				var fileName = '';
-				if (process.env.NODE_ENV == 'development') {
-					fileName = 'public/' + ad.id + '.jpg';
-				} else {
-					fileName = process.env.OPENSHIFT_DATA_DIR + '/' + ad.id + '.jpg';
+			Category.find({ "_id": ad.category.id }, function(err, category) {
+				ad.category.name = category[0]["name"];
+				if (req.body.image !== null) {
+					var data = req.body.image.replace(/^data:image\/\w+;base64,/, '');
+					var fileName = '';
+					if (process.env.NODE_ENV == 'development') {
+						fileName = 'public/' + ad.id + '.jpg';
+					} else {
+						fileName = process.env.OPENSHIFT_DATA_DIR + '/' + ad.id + '.jpg';
+					}
+					ad.image_url = fileName;
+					fs.writeFile(fileName, data, {encoding: 'base64'}, function(err){
+		  			if(err) { res.send(err); }
+					});
 				}
-				ad.image_url = fileName;
-				fs.writeFile(fileName, data, {encoding: 'base64'}, function(err){
-	  			if(err) { res.send(err); }
+
+				// save the ad and check for errors
+				ad.save(function (err) {
+					if (err) { res.send(err); }
+
+					res.json({ message: 'Ad created' });
 				});
-			}
-
-			// save the ad and check for errors
-			ad.save(function (err) {
-				if (err) { res.send(err); }
-
-				res.json({ message: 'Ad created' });
 			});
 		})
-
 	})
 
 	// get all the ads (accessed at GET '/api/ads')
@@ -106,8 +108,8 @@ router.route('/ads')
 		if (req.param('city')) {
 			query.where('city.name').equals(req.param('city'));
 		}
-		if (req.param('category_id')) {
-			query.where('category_id').equals(req.param('category_id'));
+		if (req.param('category')) {
+			query.where('category.name').equals(req.param('category'));
 		}
 		if (req.param('gt') && req.param('lt') && (req.param('lt') != 0)) {
 			query.find({ 'price': { '$gt': req.param('gt'), '$lt': req.param('lt') }});
