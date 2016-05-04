@@ -100,19 +100,23 @@ router.route('/ads')
 	.get(function (req, res) {
 		var query = Ad.find();
 
-		// searching in title and descripiton with free words
-		var text = new RegExp(req.param('text'), 'i');
-		query.find({ $or: [ { "title": text }, { "description": text } ] });
+		if (req.param('user_id') {
+			query.where('user_id').equals(req.params('user_id'));
+		} else {
+			// searching in title and descripiton with free words
+			var text = new RegExp(req.param('text'), 'i');
+			query.find({ $or: [ { "title": text }, { "description": text } ] });
 
-		// checking the city and category params, if exist bind it to our query
-		if (req.param('city')) {
-			query.where('city.name').equals(req.param('city'));
-		}
-		if (req.param('category')) {
-			query.where('category.name').equals(req.param('category'));
-		}
-		if (req.param('gt') && req.param('lt') && (req.param('lt') != 0)) {
-			query.find({ 'price': { '$gt': req.param('gt'), '$lt': req.param('lt') }});
+			// checking the city and category params, if exist bind it to our query
+			if (req.param('city')) {
+				query.where('city.name').equals(req.param('city'));
+			}
+			if (req.param('category')) {
+				query.where('category.name').equals(req.param('category'));
+			}
+			if (req.param('gt') && req.param('lt') && (req.param('lt') != 0)) {
+				query.find({ 'price': { '$gt': req.param('gt'), '$lt': req.param('lt') }});
+			}
 		}
 
 		// execute query
