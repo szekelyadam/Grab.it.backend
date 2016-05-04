@@ -101,7 +101,7 @@ router.route('/ads')
 		var query = Ad.find();
 
 		if (req.param('user_id')) {
-			query.where('user_id').equals(req.params('user_id'));
+			query.where('user_id').equals(req.param('user_id'));
 		} else {
 			// searching in title and descripiton with free words
 			var text = new RegExp(req.param('text'), 'i');
