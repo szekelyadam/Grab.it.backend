@@ -109,7 +109,7 @@ router.route('/ads')
 		if (req.param('category_id')) {
 			query.where('category_id').equals(req.param('category_id'));
 		}
-		if (req.param('gt') && req.param('lt') && (parseInt(req.param('gt')) >= 0 && parseInt(req.param('lt') > 0 && parseInt(req.param('lt') > parseInt(req.param('gt')))))) {
+		if (req.param('gt') && req.param('lt')) {
 			query.find({ 'price': { '$gt': req.param('gt'), '$lt': req.param('lt') }});
 		}
 
