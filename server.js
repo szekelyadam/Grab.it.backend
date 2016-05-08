@@ -146,30 +146,58 @@ router.route('/ads/:ad_id')
 	.put(function (req, res) {
 
 		// Use our Ad model to find the Ad we want
-		Ad.findById(req.params.ad_id, function (err, ad) {
+		Ad.findById(mongoose.Types.ObjectId(req.params.ad_id), function (err, ad) {
 			if (err) { res.send(err); }
 
-			// update the ads info
-			ad.title = req.body.title;
-			ad.price = req.body.price;
-			ad.description = req.body.description;
+			if (ad.user_id == req.body.user_id) {
 
-			ad.images = [];
+				// update the ads info
+				if (ad.title !== req.body.title) {
+					ad.title = req.body.title;
+				}
+				if (ad.price !== req.body.price) {
+					ad.price = req.body.price;
+				}
+				if (ad.description !== req.body.description) {
+					ad.description = req.body.description;
+				}
 
-			if (req.body.images !== null) {
-				req.body.images.forEach(function(imageContent) {
-					var image = new Image();
-					image.image = imageContent;
-					ad.images.push(image);
-				}, this);
+				// Update image
+				if (req.body.image !== undefined) {
+					var data = req.body.image.replace(/^data:image\/\w+;base64,/, '');
+					var fileName = '';
+					if (process.env.NODE_ENV == 'development') {
+						fileName = 'public/' + ad.id + '.jpg';
+					} else {
+						fileName = process.env.OPENSHIFT_DATA_DIR + '/' + ad.id + '.jpg';
+					}
+					ad.image_url = fileName;
+					fs.writeFile(fileName, data, {encoding: 'base64'}, function(err){
+						if(err) { res.send(err); }
+					});
+				}
+
+				if (ad.city.name !== req.body.city) {
+					City.find({ "name": req.body.city }, function(err, city) {
+						if (err) { res.send(err); }
+
+						ad.city.id = city[0]["_id"];
+						ad.city.name = req.body.city;
+
+						ad.save(function (err) {
+							if (err) { res.send(err); }
+
+							res.json({ message: 'Ad updated' });
+						});
+					});
+				} else {
+					ad.save(function (err) {
+						if (err) { res.send(err); }
+
+						res.json({ message: 'Ad updated' });
+					});
+				}
 			}
-
-			// save the ad
-			ad.save(function (err) {
-				if (err) { res.send(err); }
-
-				res.json({ message: 'Ad updated' });
-			});
 		});
 	})
 
