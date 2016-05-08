@@ -363,6 +363,84 @@ router.route('/counties')
 		});
 	});
 
+// on routes that end in /users
+// ---------------------------
+router.route('/users')
+	.post(function(req, res) {
+		User.findById(req.body.user_id, function (err, user) {
+			if (err) { res.send(err); }
+
+			if (user === null) {
+				var user = new User();
+				user._id = req.body.user_id;
+
+				user.save(function(err) {
+					if (err) { res.send(err); }
+
+					res.json({ message: 'User created' });
+				});
+			} else {
+				res.json({ message: 'User already exists' });
+			}
+		});
+	});
+
+// on routes that end in /users/:user_id
+// ------------------------------
+router.route('/users/:user_id')
+
+		.get(function(req, res) {
+			User.findById(req.params.user_id, function(err, user) {
+				if (err) { res.send(err); }
+
+				if (user !== null) {
+					res.json(user);
+				} else {
+					res.status(404).json({ message: 'User not found' });
+				}
+			})
+		})
+
+		.put(function(req, res) {
+			User.findById(req.params.user_id, function(err, user) {
+				if (err) { res.send(err); }
+
+				if (user !== null) {
+					user.name = req.body.name;
+					user.email = req.body.email;
+					user.phone = req.body.phone;
+
+					if (req.body.image !== null) {
+						var data = req.body.image.replace(/^data:image\/\w+;base64,/, '');
+						var fileName = '';
+						var dir = '';
+						if (process.env.NODE_ENV == 'development') {
+							fileName = 'public/users/' + user._id + '.jpg';
+							dir = './public/users';
+						} else {
+							fileName = process.env.OPENSHIFT_DATA_DIR + '/users/' + user._id + '.jpg';
+							dir = process.env.OPENSHIFT_DATA_DIR + '/users';
+						}
+						if (!fs.existsSync(dir)) {
+							fs.mkdirSync(dir);
+						}
+						user.image_url = fileName;
+						fs.writeFile(fileName, data, {encoding: 'base64'}, function(err){
+			  			if(err) { res.send(err); }
+						});
+					}
+
+					user.save(function(err) {
+						if (err) { res.send(err); }
+
+						res.json({ message: 'User updated' });
+					})
+				} else {
+					res.status(404).json({ message: 'User not found' });
+				}
+			})
+		});
+
 // REGISTER OUR ROUTES -----------
 // all of our routes will be prefixed with '/api'
 app.use('/api', router);
