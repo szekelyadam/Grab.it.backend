@@ -461,11 +461,9 @@ router.route('/users/:user_id/profile_picture')
 			
 			if (user !== null) {
 				res.sendFile(user.image_url, {
-					root: path.join(__dirname, userImageDest) 
+					root: userImageDest 
 				}, function (err) {
-					if (err) {
-						console.log(err);
-					}
+					if (err) { res.send(err); }
 				});	
 			} else {
 				res.status(404).json({ message: 'User not found' });
