@@ -14,7 +14,10 @@
 		"bson": "0.2.2",
 		"kerberos": "0.0.3",
 		"node-xlsx": "~0.6.0",
-		"excel": "~0.1.4"
+		"excel": "~0.1.4",
+		"path": "*",
+		"multer": "*",
+		"crypto": "*"
 	},
 	"private": true
 }
