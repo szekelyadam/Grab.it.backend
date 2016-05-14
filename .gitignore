@@ -37,4 +37,5 @@ node_modules
 jsconfig.json
 typings/
 public/
+.eslintrc.json
 

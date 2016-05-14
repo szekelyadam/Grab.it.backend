@@ -1,23 +1,23 @@
 {
-	"name": "Grab.it.backend",
-	"version": "1.0.0",
-	"description": "Grab.it iOS app backend",
-	"repository": {
-		"type": "git",
-		"url": "git://github.com/szekelyadam/Grab.it.backend.git"
-	},
-	"main": "server.js",
-	"dependencies": {
-		"express": "~4.0.0",
-		"mongoose": "~3.6.13",
-		"body-parser": "~1.0.1",
-		"bson": "0.2.2",
-		"kerberos": "0.0.3",
-		"node-xlsx": "~0.6.0",
-		"excel": "~0.1.4",
-		"path": "*",
-		"multer": "*",
-		"crypto": "*"
-	},
-	"private": true
+  "name": "Grab.it.backend",
+  "version": "1.0.0",
+  "description": "Grab.it iOS app backend",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/szekelyadam/Grab.it.backend.git"
+  },
+  "main": "server.js",
+  "dependencies": {
+    "body-parser": "~1.0.1",
+    "bson": "0.2.2",
+    "crypto": "*",
+    "excel": "~0.1.4",
+    "express": "^4.13.4",
+    "kerberos": "0.0.3",
+    "mongoose": "~3.6.13",
+    "multer": "*",
+    "node-xlsx": "~0.6.0",
+    "path": "*"
+  },
+  "private": true
 }

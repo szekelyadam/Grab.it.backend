@@ -9,7 +9,7 @@ var http = require('http');
 var fs = require('fs');
 var path = require('path');
 var multer  = require('multer');
-var crypto = require("crypto");
+var crypto = require('crypto');
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -22,26 +22,26 @@ var mongoose = require('mongoose');
 // configure statics
 var userImageDest;
 
-if (process.env.NODE_ENV == 'development') {
-	mongoose.connect('mongodb://localhost/grabit');
-	app.use('/public', express.static('public'));
-	userImageDest = './public/users';
+if (process.env.NODE_ENV === 'development') {
+    mongoose.connect('mongodb://localhost/grabit');
+    app.use('/public', express.static('public'));
+    userImageDest = './public/users/';
 } else {
-	mongoose.connect("mongodb://admin:4eH8pNKf31Kz@" + process.env.OPENSHIFT_MONGODB_DB_HOST + ":$OPENSHIFT_MONGODB_DB_PORT/grabit");
-	app.use(process.env.OPENSHIFT_DATA_DIR, express.static(process.env.OPENSHIFT_DATA_DIR));
-	userImageDest = process.env.OPENSHIFT_DATA_DIR + 'users';
+    mongoose.connect('mongodb://admin:4eH8pNKf31Kz@' + process.env.OPENSHIFT_MONGODB_DB_HOST + ':$OPENSHIFT_MONGODB_DB_PORT/grabit');
+    app.use(process.env.OPENSHIFT_DATA_DIR, express.static(process.env.OPENSHIFT_DATA_DIR));
+    userImageDest = process.env.OPENSHIFT_DATA_DIR + 'users';
 }
 
 // configure user image uploader
 var userImageStorage = multer.diskStorage({
-  destination: userImageDest,
-  filename: function (req, file, cb) {
-    crypto.pseudoRandomBytes(16, function (err, raw) {
-      if (err) return cb(err)
+    destination: userImageDest,
+    filename: function (req, file, cb) {
+        crypto.pseudoRandomBytes(16, function (err, raw) {
+            if (err) return cb(err);
 
-      cb(null, raw.toString('hex') + path.extname(file.originalname))
-    })
-  }
+            cb(null, raw.toString('hex') + path.extname(file.originalname));
+        });
+    }
 });
 var userImageUpload = multer({ storage: userImageStorage}).single('image');
 
@@ -50,10 +50,7 @@ var Ad = require('./app/models/ad.js');
 var Category = require('./app/models/category.js');
 var City = require('./app/models/city.js');
 var County = require('./app/models/county.js');
-var Image = require('./app/models/image.js');
 var User = require('./app/models/user.js');
-
-var port = process.env.port || 8080; // set our port
 
 // ROUTES FOR OUR API
 // ===========================
@@ -79,31 +76,25 @@ router.route('/ads')
 
 	// create an ad (accessed at POST '/api/ads')
 	.post(function (req, res) {
-
-		var ad = new Ad(); // Create a new instance of the Ad model
-		ad.title = req.body.title;
-		ad.description = req.body.description;
-		ad.price = req.body.price;
-		ad.city.name = req.body.city;
-
-		City.find({ "name": ad.city.name }, function(err, city) {
-			ad.city.id = city[0]["_id"];
+		var ad = new Ad(); // Create a new instance of the Ad modelad.title = req.body.title;ad.description = req.body.description;ad.price = req.body.price;ad.city.name = req.body.city;
+		City.find({ 'name': ad.city.name }, function(err, city) {
+			ad.city.id = city[0]['_id'];
 			ad.user_id = mongoose.Types.ObjectId(req.body.user_id);
 			ad.category.name = req.body.category;
 
-			Category.find({ "name": ad.category.name }, function(err, category) {
-				ad.category.id = category[0]["_id"];
+			Category.find({ 'name': ad.category.name }, function(err, category) {
+				ad.category.id = category[0]['_id'];
 				if (req.body.image !== undefined) {
 					var data = req.body.image.replace(/^data:image\/\w+;base64,/, '');
 					var fileName = '';
-					if (process.env.NODE_ENV == 'development') {
+					if (process.env.NODE_ENV === 'development') {
 						fileName = 'public/' + ad.id + '.jpg';
 					} else {
 						fileName = process.env.OPENSHIFT_DATA_DIR + '/' + ad.id + '.jpg';
 					}
 					ad.image_url = fileName;
 					fs.writeFile(fileName, data, {encoding: 'base64'}, function(err){
-		  			if(err) { res.send(err); }
+						if(err) { res.send(err); }
 					});
 				}
 
@@ -114,7 +105,7 @@ router.route('/ads')
 					res.json({ message: 'Ad created' });
 				});
 			});
-		})
+		});
 	})
 
 	// get all the ads (accessed at GET '/api/ads')
@@ -126,7 +117,7 @@ router.route('/ads')
 		} else {
 			// searching in title and descripiton with free words
 			var text = new RegExp(req.param('text'), 'i');
-			query.find({ $or: [ { "title": text }, { "description": text } ] });
+			query.find({ $or: [ { 'title': text }, { 'description': text } ] });
 
 			// checking the city and category params, if exist bind it to our query
 			if (req.param('city')) {
@@ -135,7 +126,7 @@ router.route('/ads')
 			if (req.param('category')) {
 				query.where('category.name').equals(req.param('category'));
 			}
-			if (req.param('gt') && req.param('lt') && (req.param('lt') != 0)) {
+			if (req.param('gt') && req.param('lt') && (req.param('lt') !== 0)) {
 				query.find({ 'price': { '$gt': req.param('gt'), '$lt': req.param('lt') }});
 			}
 		}
@@ -170,7 +161,7 @@ router.route('/ads/:ad_id')
 		Ad.findById(mongoose.Types.ObjectId(req.params.ad_id), function (err, ad) {
 			if (err) { res.send(err); }
 
-			if (ad.user_id == req.body.user_id) {
+			if (ad.user_id === req.body.user_id) {
 
 				// update the ads info
 				if (ad.title !== req.body.title) {
@@ -187,7 +178,7 @@ router.route('/ads/:ad_id')
 				if (req.body.image !== undefined) {
 					var data = req.body.image.replace(/^data:image\/\w+;base64,/, '');
 					var fileName = '';
-					if (process.env.NODE_ENV == 'development') {
+					if (process.env.NODE_ENV === 'development') {
 						fileName = 'public/' + ad.id + '.jpg';
 					} else {
 						fileName = process.env.OPENSHIFT_DATA_DIR + '/' + ad.id + '.jpg';
@@ -199,10 +190,10 @@ router.route('/ads/:ad_id')
 				}
 
 				if (ad.city.name !== req.body.city) {
-					City.find({ "name": req.body.city }, function(err, city) {
+					City.find({ 'name': req.body.city }, function(err, city) {
 						if (err) { res.send(err); }
 
-						ad.city.id = city[0]["_id"];
+						ad.city.id = city[0]['_id'];
 						ad.city.name = req.body.city;
 
 						ad.save(function (err) {
@@ -226,7 +217,7 @@ router.route('/ads/:ad_id')
 	.delete(function (req, res) {
 		Ad.remove({
 			_id: req.params.ad_id
-		}, function (err, ad) {
+		}, function (err) {
 			if (err) { res.send(err); }
 
 			res.json({ message: 'Successfully deleted' });
@@ -269,7 +260,7 @@ router.route('/categories')
 
 	// get all the ads (accessed at GET '/api/categories')
 	.get(function (req, res) {
-		Category.find({ "parent_id": { "$exists": false } }, function(err, categories) {
+		Category.find({ 'parent_id': { '$exists': false } }, function(err, categories) {
 			if (err) { res.send(err); }
 
 			res.json(categories);
@@ -282,7 +273,7 @@ router.route('/categories/subcategories')
 
 	// get all subcategories (accessed at GET '/api/categories/subcategories')
 	.get(function (req, res) {
-		Category.find({ "parent_id": { "$exists": true } }, function(err, categories) {
+		Category.find({ 'parent_id': { '$exists': true } }, function(err, categories) {
 			if (err) { res.send(err); }
 
 			res.json(categories);
@@ -308,12 +299,11 @@ router.route('/categories/:category_id')
 	.delete(function (req, res) {
 		Category.remove({
 			_id: req.params.category_id
-		}, function (err, category) {
+		}, function (err) {
 			if (err) { res.send(err); }
 
 			res.json({ message: 'Successfully deleted' });
 		});
-
 	});
 
 // on routes that end in /categories/:category_id/subcategories
@@ -321,11 +311,10 @@ router.route('/categories/:category_id/subcategories')
 
 	// get the category's subcategories
 	.get(function (req, res) {
-
 		Category.findById(req.params.category_id, function(err, category) {
 			if (err) { res.send(err); }
 
-			Category.find({ "parent_id": category._id }, function(err, subcategories) {
+			Category.find({ 'parent_id': category._id }, function(err, subcategories) {
 				if (err) { res.send(err); }
 
 				res.json(subcategories);
@@ -357,11 +346,11 @@ router.route('/cities')
 // ----------------------------
 router.route('/cities/:city_id')
 	.get(function (req, res) {
-		City.find({ "_id": req.params.city_id }, function(err, city) {
+		City.find({ '_id': req.params.city_id }, function(err, city) {
 			if (err) { res.send(err); }
 			console.log(req.params.city_id);
-			res.json(city[0]["name"]);
-		})
+			res.json(city[0]['name']);
+		});
 	});
 
 // on routes that end in /counties
@@ -388,10 +377,10 @@ router.route('/counties')
 // ---------------------------
 router.route('/users')
 	.post(function(req, res) {
-		User.findById(req.body.user_id, function (err, user) {
+		User.findById(req.body.user_id, function (err, u) {
 			if (err) { res.send(err); }
 
-			if (user === null) {
+			if (u === null) {
 				var user = new User();
 				user._id = req.body.user_id;
 
@@ -410,42 +399,79 @@ router.route('/users')
 // ------------------------------
 router.route('/users/:user_id')
 
-		.get(function(req, res) {
-			User.findById(req.params.user_id, function(err, user) {
-				if (err) { res.send(err); }
+	.get(function(req, res) {
+		User.findById(req.params.user_id, function(err, user) {
+			if (err) { res.send(err); }
 
-				if (user !== null) {
-					res.json(user);
-				} else {
-					res.status(404).json({ message: 'User not found' });
-				}
-			})
-		})
+			if (user !== null) {
+				res.json(user);
+			} else {
+				res.status(404).json({ message: 'User not found' });
+			}
+		});
+	})
 
-		.put(function(req, res) {
-			User.findById(req.params.user_id, function(err, user) {
-				if (err) { res.send(err); }
-				
-				if (user !== null) {
-					userImageUpload(req, res, function(err) {
+	.put(function(req, res) {
+		User.findById(req.params.user_id, function(err, user) {
+			if (err) { res.send(err); }
+
+			if (user !== null) {
+				user.name = req.body.name;
+				user.email = req.body.email;
+				user.phone = req.body.phone;
+		
+				user.save(function(err) {
+					if (err) { res.send(err); }
+
+					res.json({ message: 'User updated' });
+				});
+			} else {
+				res.status(404).json({ message: 'User not found' });
+			}
+		});
+	});
+
+router.route('/users/:user_id/profile_picture')
+
+	.post(function(req, res) {
+		User.findById(req.params.user_id, function(err, user) {
+			if (err) { res.send(err); }
+			
+			if (user !== null) {
+				userImageUpload(req, res, function(err) {
+					if (err) { res.send(err); }
+					
+					user.image_url = req.file.filename;
+					
+					user.save(function (err) {
 						if (err) { res.send(err); }
 						
-						user.name = req.body.name;
-						user.email = req.body.email;
-						user.phone = req.body.phone;
-						user.image_url = req.file.filename;
-						
-						user.save(function(err) {
-							if (err) { res.send(err); }
-
-							res.json({ message: 'User updated' });
-						})
+						res.json({ message: 'Image uploaded' });
 					});
-				} else {
-					res.status(404).json({ message: 'User not found' });
-				}
-			})
+				});
+			} else {
+				res.status(404).json({ message: 'User not found' });
+			}		
 		});
+	})
+	
+	.get(function (req, res) {
+		User.findById(req.params.user_id, function (err, user) {
+			if (err) { res.send(err); }
+			
+			if (user !== null) {
+				res.sendFile(user.image_url, {
+					root: path.join(__dirname, userImageDest) 
+				}, function (err) {
+					if (err) {
+						console.log(err);
+					}
+				});	
+			} else {
+				res.status(404).json({ message: 'User not found' });
+			}
+		});
+	});		
 
 // REGISTER OUR ROUTES -----------
 // all of our routes will be prefixed with '/api'
@@ -454,7 +480,7 @@ app.use('/api', router);
 // START THE SERVER
 // ===========================
 app.set('port', process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || 3002);
-app.set('ip', process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1");
+app.set('ip', process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1');
 
 http.createServer(app).listen(app.get('port') ,app.get('ip'));
 
