@@ -7,6 +7,9 @@ var app = express(); // define our app using express
 var bodyParser = require('body-parser');
 var http = require('http');
 var fs = require('fs');
+var path = require('path');
+var multer  = require('multer');
+var crypto = require("crypto");
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -16,13 +19,31 @@ app.use(bodyParser.json());
 // configure database
 var mongoose = require('mongoose');
 
+// configure statics
+var userImageDest;
+
 if (process.env.NODE_ENV == 'development') {
 	mongoose.connect('mongodb://localhost/grabit');
 	app.use('/public', express.static('public'));
+	userImageDest = './public/users';
 } else {
 	mongoose.connect("mongodb://admin:4eH8pNKf31Kz@" + process.env.OPENSHIFT_MONGODB_DB_HOST + ":$OPENSHIFT_MONGODB_DB_PORT/grabit");
 	app.use(process.env.OPENSHIFT_DATA_DIR, express.static(process.env.OPENSHIFT_DATA_DIR));
+	userImageDest = process.env.OPENSHIFT_DATA_DIR + 'users';
 }
+
+// configure user image uploader
+var userImageStorage = multer.diskStorage({
+  destination: userImageDest,
+  filename: function (req, file, cb) {
+    crypto.pseudoRandomBytes(16, function (err, raw) {
+      if (err) return cb(err)
+
+      cb(null, raw.toString('hex') + path.extname(file.originalname))
+    })
+  }
+});
+var userImageUpload = multer({ storage: userImageStorage}).single('image');
 
 // importing models
 var Ad = require('./app/models/ad.js');
@@ -404,37 +425,22 @@ router.route('/users/:user_id')
 		.put(function(req, res) {
 			User.findById(req.params.user_id, function(err, user) {
 				if (err) { res.send(err); }
-
+				
 				if (user !== null) {
-					user.name = req.body.name;
-					user.email = req.body.email;
-					user.phone = req.body.phone;
-
-					if (req.body.image !== null) {
-						var data = req.body.image.replace(/^data:image\/\w+;base64,/, '');
-						var fileName = '';
-						var dir = '';
-						if (process.env.NODE_ENV == 'development') {
-							fileName = 'public/users/' + user._id + '.jpg';
-							dir = './public/users';
-						} else {
-							fileName = process.env.OPENSHIFT_DATA_DIR + '/users/' + user._id + '.jpg';
-							dir = process.env.OPENSHIFT_DATA_DIR + '/users';
-						}
-						if (!fs.existsSync(dir)) {
-							fs.mkdirSync(dir);
-						}
-						user.image_url = fileName;
-						fs.writeFile(fileName, data, {encoding: 'base64'}, function(err){
-			  			if(err) { res.send(err); }
-						});
-					}
-
-					user.save(function(err) {
+					userImageUpload(req, res, function(err) {
 						if (err) { res.send(err); }
+						
+						user.name = req.body.name;
+						user.email = req.body.email;
+						user.phone = req.body.phone;
+						user.image_url = req.file.filename;
+						
+						user.save(function(err) {
+							if (err) { res.send(err); }
 
-						res.json({ message: 'User updated' });
-					})
+							res.json({ message: 'User updated' });
+						})
+					});
 				} else {
 					res.status(404).json({ message: 'User not found' });
 				}

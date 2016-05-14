@@ -34,4 +34,7 @@ node_modules
 .DS_Store
 
 *.jpg
+jsconfig.json
+typings/
+public/
 
