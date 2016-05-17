@@ -126,7 +126,8 @@ router.route('/ads')
 			if (req.param('category')) {
 				query.where('category.name').equals(req.param('category'));
 			}
-			if (req.param('gt') && req.param('lt') && (req.param('lt') !== 0)) {
+
+			if (req.param('gt') && req.param('lt') && (parseInt(req.param('lt')) !== 0)) {
 				query.find({ 'price': { '$gt': req.param('gt'), '$lt': req.param('lt') }});
 			}
 		}
@@ -419,7 +420,7 @@ router.route('/users/:user_id')
 				user.name = req.body.name;
 				user.email = req.body.email;
 				user.phone = req.body.phone;
-		
+
 				user.save(function(err) {
 					if (err) { res.send(err); }
 
@@ -436,40 +437,40 @@ router.route('/users/:user_id/profile_picture')
 	.post(function(req, res) {
 		User.findById(req.params.user_id, function(err, user) {
 			if (err) { res.send(err); }
-			
+
 			if (user !== null) {
 				userImageUpload(req, res, function(err) {
 					if (err) { res.send(err); }
-					
+
 					user.image_url = req.file.filename;
-					
+
 					user.save(function (err) {
 						if (err) { res.send(err); }
-						
+
 						res.json({ message: 'Image uploaded' });
 					});
 				});
 			} else {
 				res.status(404).json({ message: 'User not found' });
-			}		
+			}
 		});
 	})
-	
+
 	.get(function (req, res) {
 		User.findById(req.params.user_id, function (err, user) {
 			if (err) { res.send(err); }
-			
+
 			if (user !== null) {
 				res.sendFile(user.image_url, {
-					root: userImageDest 
+					root: userImageDest
 				}, function (err) {
 					if (err) { res.send(err); }
-				});	
+				});
 			} else {
 				res.status(404).json({ message: 'User not found' });
 			}
 		});
-	});		
+	});
 
 // REGISTER OUR ROUTES -----------
 // all of our routes will be prefixed with '/api'
