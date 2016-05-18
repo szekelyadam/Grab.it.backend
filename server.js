@@ -21,15 +21,18 @@ var mongoose = require('mongoose');
 
 // configure statics
 var userImageDest;
+var adImageDest;
 
 if (process.env.NODE_ENV === 'development') {
     mongoose.connect('mongodb://localhost/grabit');
     app.use('/public', express.static('public'));
     userImageDest = './public/users/';
+    adImageDest = './public/ads/';
 } else {
     mongoose.connect('mongodb://admin:4eH8pNKf31Kz@' + process.env.OPENSHIFT_MONGODB_DB_HOST + ':$OPENSHIFT_MONGODB_DB_PORT/grabit');
     app.use(process.env.OPENSHIFT_DATA_DIR, express.static(process.env.OPENSHIFT_DATA_DIR));
     userImageDest = process.env.OPENSHIFT_DATA_DIR + 'users';
+    adImageDest = process.env.OPENSHIFT_DATA_DIR + 'ads';
 }
 
 // configure user image uploader
@@ -44,6 +47,19 @@ var userImageStorage = multer.diskStorage({
     }
 });
 var userImageUpload = multer({ storage: userImageStorage}).single('image');
+
+// configure ad image uploader
+var adImageStorage = multer.diskStorage({
+    destination: adImageDest,
+    filename: function (req, file, cb) {
+        crypto.pseudoRandomBytes(16, function (err, raw) {
+            if (err) return cb(err);
+
+            cb(null, raw.toString('hex') + path.extname(file.originalname));
+        });
+    }
+});
+var adImageUpload = multer({ storage: adImageStorage}).single('image');
 
 // importing models
 var Ad = require('./app/models/ad.js');
@@ -231,6 +247,46 @@ router.route('/ads/:ad_id')
 
 	});
 
+
+  router.route('/ads/:ad_id/image')
+
+    .post(function(req, res) {
+      Ad.findById(req.params.ad_id, function(err, ad) {
+        if (err) { res.send(err); }
+
+        if (ad !== null) {
+          adImageUpload(req, res, function(err) {
+            if (err) { res.send(err); }
+
+            ad.image_url = req.file.filename;
+
+            ad.save(function (err) {
+              if (err) { res.send(err); }
+
+              res.json({ message: 'Image uploaded' });
+            });
+          });
+        } else {
+          res.status(404).json({ message: 'Ad not found' });
+        }
+      });
+    })
+
+    .get(function (req, res) {
+      Ad.findById(req.params.ad_id, function (err, ad) {
+        if (err) { res.send(err); }
+
+        if (ad !== null) {
+          res.sendFile(ad.image_url, {
+            root: adImageDest
+          }, function (err) {
+            if (err) { res.send(err); }
+          });
+        } else {
+          res.status(404).json({ message: 'Ad not found' });
+        }
+      });
+    });
 
 // on routes that end in /categories
 // ---------------------------
