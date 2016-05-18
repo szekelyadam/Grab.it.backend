@@ -165,10 +165,10 @@ router.route('/ads/:ad_id')
 
 		// Use our Ad model to find the Ad we want
 		Ad.findById(mongoose.Types.ObjectId(req.params.ad_id), function (err, ad) {
+      console.log('Ad found');
 			if (err) { res.send(err); }
 
-			if (ad.user_id === req.body.user_id) {
-
+			if (String(ad.user_id) === req.body.user_id) {
 				// update the ads info
 				if (ad.title !== req.body.title) {
 					ad.title = req.body.title;
