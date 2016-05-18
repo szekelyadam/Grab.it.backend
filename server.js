@@ -80,7 +80,7 @@ router.route('/ads')
 		City.find({ 'name': req.body.city }, function(err, city) {
       console.log(city);
 			ad.city.id = city[0]['_id'];
-      ad.city.name = city.name;
+      ad.city.name = req.body.city;
 			ad.user_id = mongoose.Types.ObjectId(req.body.user_id);
 			ad.category.name = req.body.category;
       ad.price = req.body.price;
