@@ -77,10 +77,14 @@ router.route('/ads')
 	// create an ad (accessed at POST '/api/ads')
 	.post(function (req, res) {
 		var ad = new Ad(); // Create a new instance of the Ad modelad.title = req.body.title;ad.description = req.body.description;ad.price = req.body.price;ad.city.name = req.body.city;
-		City.find({ 'name': ad.city.name }, function(err, city) {
+		City.find({ 'name': req.body.city }, function(err, city) {
+      console.log(city);
 			ad.city.id = city[0]['_id'];
 			ad.user_id = mongoose.Types.ObjectId(req.body.user_id);
 			ad.category.name = req.body.category;
+      ad.price = req.body.price;
+      ad.description = req.body.description;
+      ad.title = req.body.title;
 
 			Category.find({ 'name': ad.category.name }, function(err, category) {
 				ad.category.id = category[0]['_id'];
