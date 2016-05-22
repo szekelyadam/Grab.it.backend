@@ -123,7 +123,7 @@ router.route('/ads')
 				ad.save(function (err) {
 					if (err) { res.send(err); }
 
-					res.json({ message: 'Ad created' });
+					res.json({ message: 'Ad created', id: ad._id });
 				});
 			});
 		});
