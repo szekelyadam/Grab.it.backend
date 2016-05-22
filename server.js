@@ -393,7 +393,7 @@ router.route('/cities')
 			if (err) { res.send(err); }
 
 			if (cities.length === 0) {
-				var seed = require('./app/helpers/seed');
+				var seed = require('./app/helpers/seedLocations');
 				seed();
 				City.find().sort('name').exec(function(err, cities) {
 					if (err) { res.send(err); }
@@ -539,11 +539,44 @@ router.route('/users/:user_id/profile_picture')
 // all of our routes will be prefixed with '/api'
 app.use('/api', router);
 
+
 // START THE SERVER
 // ===========================
 app.set('port', process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || 3002);
 app.set('ip', process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1');
 
-http.createServer(app).listen(app.get('port') ,app.get('ip'));
+var server = http.createServer(app).listen(app.get('port') ,app.get('ip'));
+
+var clients = [];
+
+var io = require('socket.io')(server);
+
+io.on('connect', function(client){
+  console.log('a user connected');
+
+  client.on('register', function (data) {
+    var clientInfo = new Object();
+    clientInfo.customId = data;
+    clientInfo.clientId = client.id;
+    clients.push(clientInfo);
+  });
+
+  client.on('message', function(data) {
+    var to = '';
+    var from = '';
+    clients.forEach(function(c) {
+      if (c.customId === data[1]) {
+        to = c.clientId;
+      } else if (c.customId === data[0]) {
+        from = c.clientId;
+      }
+    });
+    io.emit('message', { from: from, to: to, msg: data[2] });
+    console.log(data);
+    console.log(to);
+    console.log(from);
+    console.log(data[2]);
+   });
+});
 
 console.log('Magic happens on port ' + app.get('port'));
