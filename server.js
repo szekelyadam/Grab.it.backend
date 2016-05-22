@@ -251,6 +251,7 @@ router.route('/ads/:ad_id')
   router.route('/ads/:ad_id/image')
 
     .post(function(req, res) {
+      console.log(req.headers);
       Ad.findById(req.params.ad_id, function(err, ad) {
         if (err) { res.send(err); }
 
@@ -496,6 +497,7 @@ router.route('/users/:user_id')
 router.route('/users/:user_id/profile_picture')
 
 	.post(function(req, res) {
+    console.log(req.headers);
 		User.findById(req.params.user_id, function(err, user) {
 			if (err) { res.send(err); }
 
