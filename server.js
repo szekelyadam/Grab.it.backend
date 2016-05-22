@@ -97,7 +97,7 @@ router.route('/ads')
       console.log(city);
 			ad.city.id = city[0]['_id'];
       ad.city.name = req.body.city;
-			ad.user_id = mongoose.Types.ObjectId(req.body.user_id);
+			ad.user_id = req.body.user_id;
 			ad.category.name = req.body.category;
       ad.price = req.body.price;
       ad.description = req.body.description;
