@@ -65,6 +65,7 @@ var adImageUpload = multer({ storage: adImageStorage}).single('image');
 var Ad = require('./app/models/ad.js');
 var Category = require('./app/models/category.js');
 var City = require('./app/models/city.js');
+var Conversation = require('./app/models/conversation.js');
 var County = require('./app/models/county.js');
 var User = require('./app/models/user.js');
 
@@ -535,6 +536,37 @@ router.route('/users/:user_id/profile_picture')
 		});
 	});
 
+router.route('/users/:user_id/conversations')
+  .get(function (req, res) {
+    User.findById(req.params.user_id, function (err, user) {
+      if (err) { res.send(err); }
+
+      if (user !== null) {
+        Conversation.find({
+          $or: [{ 'receiver._id': user._id }, { 'sender._id': user._id }]
+          }, function(err, conv) {
+            if (err) { res.send(err); }
+
+            res.json(conv);
+          }
+        );
+      } else {
+				res.status(404).json({ message: 'User not found' });
+			}
+    });
+  });
+
+router.route('/conversations/:conversation_id/messages')
+    .get(function (req, res) {
+      Conversation.findById(req.params.conversation_id, function (err, conv) {
+        if (err) { res.send(err); }
+
+        res.json(conv.messages);
+      });
+    });
+
+
+
 // REGISTER OUR ROUTES -----------
 // all of our routes will be prefixed with '/api'
 app.use('/api', router);
@@ -564,6 +596,9 @@ io.on('connect', function(client){
   client.on('message', function(data) {
     var to = '';
     var from = '';
+    var toId = data[1];
+    var fromId = data[0];
+
     clients.forEach(function(c) {
       if (c.customId === data[1]) {
         to = c.clientId;
@@ -571,12 +606,73 @@ io.on('connect', function(client){
         from = c.clientId;
       }
     });
-    io.emit('message', { from: from, to: to, msg: data[2] });
+
+    var msg = data[2];
+
+    Conversation.findOne({
+      $or: [
+        { $and: [{ 'receiver.id': toId }, { 'sender.id': fromId }] },
+        { $and: [{ 'receiver.id': fromId }, { 'sender.id': toId }] }
+      ]
+    }, function(err, conv) {
+      if (err) return;
+
+      if (conv === null) {
+        var conversation = new Conversation();
+
+        User.findById(fromId, function(err, sender) {
+
+          conversation.sender._id = fromId;
+          if (sender === null || sender.name === null) {
+            conversation.sender.name = 'Hidden';
+          } else {
+            conversation.sender.name = sender.name;
+          }
+
+          User.findById(toId, function(err, receiver) {
+
+            if (receiver === null || receiver.name === null) {
+              conversation.receiver.name = 'Hidden';
+            } else {
+              conversation.receiver.name = receiver.name;
+            }
+            conversation.receiver._id = toId;
+
+
+            conversation.messages.push({
+              sender_id: fromId,
+              receiver_id: toId,
+              message: msg
+            });
+
+            conversation.updated = Date.now();
+            conversation.save();
+          });
+        });
+      } else {
+        conv.messages.push({
+          sender_id: fromId,
+          receiver_id: toId,
+          message: msg
+        });
+        conv.updated = Date.now();
+        conv.save();
+      }
+    });
+
+    io.emit('message', { from: from, to: to, msg: msg });
     console.log(data);
     console.log(to);
     console.log(from);
     console.log(data[2]);
    });
 });
+
+router.route('/test')
+  .get(function(req, res) {
+    io.emit('message', { from: 'asds', to: 'C2BBF6C8-615B-470E-A422-F5ADCF3769CA', msg: 'hello' });
+
+    res.json({message: 'ok'});
+  });
 
 console.log('Magic happens on port ' + app.get('port'));
